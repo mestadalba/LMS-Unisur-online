@@ -1,0 +1,93 @@
+1. Crear la tabla profiles: En el SQL Editor de Supabase, pega y ejecuta este código para crear la tabla de usuarios con roles:
+
+
+-- Crear tabla de perfiles
+create table profiles (
+  id uuid references auth.users on delete cascade not null primary key,
+  updated_at timestamp with time zone,
+  username text unique,
+  full_name text,
+  avatar_url text,
+  role text check (role in ('admin', 'instructor', 'student')) default 'student',
+  
+  constraint username_length check (char_length(username) >= 3)
+);
+
+-- Habilitar Row Level Security (RLS) por seguridad
+alter table profiles enable row level security;
+
+-- Crear política: los usuarios pueden ver todos los perfiles, pero solo editar el suyo
+create policy "Public profiles are viewable by everyone." on profiles
+  for select using (true);
+
+create policy "Users can insert their own profile." on profiles
+  for insert with check (auth.uid() = id);
+
+create policy "Users can update own profile." on profiles
+  for update using (auth.uid() = id);
+
+
+
+2. Crear el cliente de Supabase
+Crea una carpeta llamada src/lib y dentro un archivo supabaseClient.js:
+
+JavaScript
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+
+
+3. Sincronización automática (Trigger)
+Para que cuando alguien se registre en tu LMS, se cree automáticamente una fila en tu tabla profiles, ejecuta esto en el SQL Editor de Supabase:
+
+SQL
+-- Función que se activa al crear un usuario en Auth
+create function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, full_name, avatar_url)
+  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- Trigger que llama a la función
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+
+
+4. Crear tablas de cursos y lecciones 
+
+-- Tabla de Cursos
+create table courses (
+  id uuid default uuid_generate_v4() primary key,
+  title text not null,
+  description text,
+  image_url text,
+  instructor_id uuid references profiles(id),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Tabla de Lecciones (Hijas de los cursos)
+create table lessons (
+  id uuid default uuid_generate_v4() primary key,
+  course_id uuid references courses(id) on delete cascade,
+  title text not null,
+  content_url text, -- Aquí irá el link del video o PDF
+  order_index int,  -- Para saber cuál es la lección 1, 2, 3...
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Habilitar RLS para que todos puedan ver cursos pero solo el admin edite
+alter table courses enable row level security;
+alter table lessons enable row level security;
+
+create policy "Cursos visibles para todos" on courses for select using (true);
+create policy "Lecciones visibles para todos" on lessons for select using (true);
+
