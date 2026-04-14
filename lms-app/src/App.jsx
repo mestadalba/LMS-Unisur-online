@@ -2,23 +2,21 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
 
-// ... (imports anteriores)
-import Login from './pages/Login'; // Importa el nuevo componente
 import Register from './pages/Register';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-// Nota: Puedes crear un componente Login similar al de Register
-// import Login from './pages/Login'; 
+import CreateCourse from './pages/CreateCourse'; // Asegúrate de que este archivo exista
 
 function App() {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    // Revisar si hay una sesión activa al cargar la app
+    // Obtener sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
 
-    // Escuchar cambios en el estado de autenticación (Login/Logout)
+    // Escuchar cambios de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
@@ -29,17 +27,22 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta pública: Registro */}
+        {/* Rutas Públicas */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* Ruta protegida: Solo si hay sesión va al Dashboard, si no al Register */}
+        {/* Rutas Protegidas */}
         <Route 
           path="/dashboard" 
-          element={session ? <Dashboard /> : <Navigate to="/register" />} 
+          element={session ? <Dashboard /> : <Navigate to="/login" />} 
+        />
+        
+        <Route 
+          path="/create-course" 
+          element={session ? <CreateCourse /> : <Navigate to="/login" />} 
         />
 
-        {/* Ruta por defecto: Redirige al Dashboard (que a su vez checa sesión) */}
+        {/* Redirección por defecto */}
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
