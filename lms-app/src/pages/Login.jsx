@@ -1,33 +1,25 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { useNavigate, Link } from 'react-router-dom'; // Añade Link si quieres poner un enlace al Login abajo
+import { useNavigate, Link } from 'react-router-dom';
 
-const Register = () => {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
     });
 
     if (error) {
-      alert("Error al registrar: " + error.message);
+      alert("Error al iniciar sesión: " + error.message);
     } else {
-      alert("¡Registro exitoso!");
       navigate('/dashboard');
     }
     setLoading(false);
@@ -35,18 +27,8 @@ const Register = () => {
 
   return (
     <div style={{ maxWidth: '400px', margin: 'auto', padding: '2rem' }}>
-      <h2>Registro LMS Unisur</h2>
-      <form onSubmit={handleRegister}>
-        <div style={{ marginBottom: '1rem' }}>
-          <input 
-            type="text" 
-            placeholder="Nombre Completo" 
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            style={{ width: '100%', padding: '8px' }}
-            required 
-          />
-        </div>
+      <h2>Iniciar Sesión - LMS</h2>
+      <form onSubmit={handleLogin}>
         <div style={{ marginBottom: '1rem' }}>
           <input 
             type="email" 
@@ -70,16 +52,16 @@ const Register = () => {
         <button 
           type="submit" 
           disabled={loading}
-          style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
         >
-          {loading ? 'Registrando...' : 'Crear Cuenta'}
+          {loading ? 'Entrando...' : 'Iniciar Sesión'}
         </button>
       </form>
-      <p>
-        ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+      <p style={{ marginTop: '1rem' }}>
+        ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
       </p>
     </div>
   );
 };
 
-export default Register;
+export default Login;

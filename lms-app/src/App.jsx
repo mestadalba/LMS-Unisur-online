@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
 
+// ... (imports anteriores)
+import Login from './pages/Login'; // Importa el nuevo componente
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 // Nota: Puedes crear un componente Login similar al de Register
@@ -28,6 +30,7 @@ function App() {
     <Router>
       <Routes>
         {/* Ruta pública: Registro */}
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
         {/* Ruta protegida: Solo si hay sesión va al Dashboard, si no al Register */}
