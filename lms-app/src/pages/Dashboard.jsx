@@ -17,21 +17,25 @@ const Dashboard = () => {
     fetchCourses();
   }, []);
 
-  const fetchCourses = async () => {
-    setFetchingCourses(true);
-    // Pedimos TODO de la relación para ver los nombres reales en la consola
-    const { data, error } = await supabase
-        .from('courses')
-        .select(`*, profiles!instructor_id(*)`);
+const fetchCourses = async () => {
+  setFetchingCourses(true);
+  
+  const { data, error } = await supabase
+    .from('courses')
+    .select(`
+      *,
+      profiles!instructor_id (
+        full_name
+      )
+    `);
 
-    if (error) {
-        console.error("Error crítico:", error);
-    } else {
-        console.log("Estructura recibida:", data[0]); // <--- MIRA ESTO EN LA CONSOLA (F12)
-        setCourses(data);
-    }
-    setFetchingCourses(false);
-  };
+  if (error) {
+    console.error("Error cargando cursos:", error);
+  } else {
+    setCourses(data);
+  }
+  setFetchingCourses(false);
+};
 
   if (profileLoading || fetchingCourses) return <p>Cargando información...</p>;
 
@@ -68,7 +72,7 @@ const Dashboard = () => {
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.8rem', color: '#888' }}>
-                    Docente: <strong>{course.profiles?.nombre_completo || 'Anonimo'}</strong>
+                    Docente: <strong>{course.profiles?.full_name || 'Sin asignar'}</strong>
                   </span>
                   <button 
                     style={{ backgroundColor: '#007bff', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px', cursor: 'pointer' }}
