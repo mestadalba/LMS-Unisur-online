@@ -19,33 +19,32 @@ serve(async (req: Request) => {
     
     // --- CONFIGURACIÓN DE TU URL ---
     // Cambia esto por la URL real de tu Dashboard donde se ven los cursos
-    const BASE_URL = "https://tae-lms-unisur-online.vercel.app/courses";
+    const BASE_URL = "http://localhost:5173/courses";
 
     // 3. Procesar el catálogo de cursos (Contexto)
     // Lo hacemos AQUÍ, después de recibir el 'context' del req.json()
     let catalogoTexto = "No hay cursos disponibles actualmente.";
+
     if (context && Array.isArray(context)) {
       catalogoTexto = context.map((curso: any) => {
         const t = curso.title?.trim() || "Sin Título";
         const d = curso.description?.trim() || "Sin Descripción";
         const id = curso.id;
+        
         return `- CURSO: "${t}" | DETALLE: ${d} | LINK: ${BASE_URL}/${id}`;
       }).join('\n');
     }
 
     // 4. Configurar IA
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-3-flash-preview", 
-      tools: [{ googleSearchRetrieval: {} }]
-     });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
     // 5. Iniciar Chat con Instrucciones Híbridas
     const chat = model.startChat({
       history: [
         {
           role: "user",
-          parts: [{ text: `TAE: Tutor Autómata Educativo). 
+          parts: [{ text: `Actúa como un experto de TAE (Taller de Actualización Empresarial). 
           
           CATÁLOGO INTERNO (Prioridad):
           ${catalogoTexto}
@@ -58,7 +57,7 @@ serve(async (req: Request) => {
         },
         {
           role: "model",
-          parts: [{ text: "Soy el asistente TAE. Responderé basándome en el catálogo de cursos y en mi conocimiento general para ayudarte. ¿Qué deseas consultar?" }],
+          parts: [{ text: "Entendido. Soy el asistente de TAE. Responderé basándome en el catálogo de cursos y en mi conocimiento general para ayudarte. ¿Qué deseas consultar?" }],
         },
       ],
     });
@@ -69,7 +68,7 @@ serve(async (req: Request) => {
     // 6. Enviar mensaje y responder
     const result = await chat.sendMessage(promptText);
     const response = await result.response;
-    const text = response.text() || "Lo siento, no pude procesar esa respuesta. ¿Puedes intentar de nuevo?";
+    const text = response.text();
 
     return new Response(JSON.stringify({ answer: text }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -77,9 +76,16 @@ serve(async (req: Request) => {
   
   } catch (err: any) {
     console.error("Error en Edge Function:", err.message);
+    
     return new Response(
-      JSON.stringify({ error: "Error en la IA", detalle: err.message }), 
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        error: "Error en la ejecución de la IA", 
+        detalle: err.message 
+      }), 
+      { 
+        status: 200, // Mantenemos 200 para que el frontend maneje el mensaje de error suavemente
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     );
   }
 })
