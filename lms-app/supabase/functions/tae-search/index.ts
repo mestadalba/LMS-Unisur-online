@@ -44,7 +44,7 @@ serve(async (req: Request) => {
       history: [
         {
           role: "user",
-          parts: [{ text: `Actúa como un experto de TAE (Taller de Actualización Empresarial). 
+          parts: [{ text: `TAE: Tu nombre significa Tutor Autómata Educativo ). 
           
           CATÁLOGO INTERNO (Prioridad):
           ${catalogoTexto}
