@@ -5,45 +5,79 @@ import { supabase } from './lib/supabaseClient';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import CreateCourse from './pages/CreateCourse'; // Asegúrate de que este archivo exista
+import CreateCourse from './pages/CreateCourse';
+import Profile from './pages/Profile';
+
+// Componente para proteger rutas
+function PrivateRoute({ session, children }) {
+  return session ? children : <Navigate to="/login" />;
+}
 
 function App() {
   const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Obtener sesión inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // Obtener sesión actual
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
     });
 
-    // Escuchar cambios de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    // Escuchar cambios de sesión
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
+
+  if (loading) return <p>Cargando app...</p>;
 
   return (
     <Router>
       <Routes>
-        {/* Rutas Públicas */}
+        {/* Públicas */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
-        {/* Rutas Protegidas */}
-        <Route 
-          path="/dashboard" 
-          element={session ? <Dashboard /> : <Navigate to="/login" />} 
-        />
-        
-        <Route 
-          path="/create-course" 
-          element={session ? <CreateCourse /> : <Navigate to="/login" />} 
+
+        {/* Privadas */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute session={session}>
+              <Dashboard />
+            </PrivateRoute>
+          }
         />
 
-        {/* Redirección por defecto */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route
+          path="/create-course"
+          element={
+            <PrivateRoute session={session}>
+              <CreateCourse />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute session={session}>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Default */}
+        <Route
+          path="/"
+          element={<Navigate to={session ? "/dashboard" : "/login"} />}
+        />
       </Routes>
     </Router>
   );
