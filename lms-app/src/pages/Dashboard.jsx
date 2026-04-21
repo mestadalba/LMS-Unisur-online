@@ -29,6 +29,7 @@ const Dashboard = () => {
     setAnswer("");
 
     try {
+      console.log("nos vemos")
       // VALIDACIÓN: Forzamos el envío de un JSON limpio
       const { data, error } = await supabase.functions.invoke('tae-search', {
         body: JSON.stringify({ query: searchQuery.trim(), context: courses }), // Enviamos como string para evitar errores de parseo

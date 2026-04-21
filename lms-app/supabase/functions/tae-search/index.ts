@@ -19,21 +19,24 @@ serve(async (req: Request) => {
     
     // --- CONFIGURACIÓN DE TU URL ---
     // Cambia esto por la URL real de tu Dashboard donde se ven los cursos
-    const BASE_URL = "http://localhost:5173/courses";
+    const BASE_URL = "https://tae-lms-unisur-online.vercel.app/courses";
 
     // 3. Procesar el catálogo de cursos (Contexto)
     // Lo hacemos AQUÍ, después de recibir el 'context' del req.json()
+    // Cambia tu bloque de procesamiento por este que es más robusto:
     let catalogoTexto = "No hay cursos disponibles actualmente.";
 
     if (context && Array.isArray(context)) {
       catalogoTexto = context.map((curso: any) => {
-        const t = curso.title?.trim() || "Sin Título";
-        const d = curso.description?.trim() || "Sin Descripción";
+        // Forzamos la lectura incluso si las llaves vienen distintas
+        const t = (curso.title || curso.Title || "Sin Título").trim();
+        const d = (curso.description || curso.Description || "Sin Descripción").trim();
         const id = curso.id;
         
         return `- CURSO: "${t}" | DETALLE: ${d} | LINK: ${BASE_URL}/${id}`;
       }).join('\n');
     }
+    console.log("Catálogo procesado para la IA:", catalogoTexto); // Revisa esto en los logs de Supabase
 
     // 4. Configurar IA
     const genAI = new GoogleGenerativeAI(apiKey);
