@@ -1,6 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-// Importamos el SDK de Google directamente desde un CDN compatible con Deno
-import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai"
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,34 +7,85 @@ const corsHeaders = {
 }
 
 serve(async (req: Request) => {
-  // Manejo de CORS
+  // 1. Manejo de Preflight (CORS) - Siempre al inicio
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    const { query } = await req.json();
+    // 2. Extraer datos del Body
+    const { query, context } = await req.json();
     const apiKey = Deno.env.get('GEMINI_API_KEY');
 
-    if (!apiKey) throw new Error("Falta la GEMINI_API_KEY en los secretos.");
+    if (!apiKey) {throw new Error("Falta la configuración de GEMINI_API_KEY en los secretos de Supabase.");}
+    
+    // --- CONFIGURACIÓN DE TU URL ---
+    // Cambia esto por la URL real de tu Dashboard donde se ven los cursos
+    const BASE_URL = "http://localhost:5173/courses";
 
-    // 1. Inicializamos el SDK con tu llave
+    // 3. Procesar el catálogo de cursos (Contexto)
+    // Lo hacemos AQUÍ, después de recibir el 'context' del req.json()
+    let catalogoTexto = "No hay cursos disponibles actualmente.";
+
+    if (context && Array.isArray(context)) {
+      catalogoTexto = context.map((curso: any) => {
+        const t = curso.title?.trim() || "Sin Título";
+        const d = curso.description?.trim() || "Sin Descripción";
+        const id = curso.id; // Obtenemos el ID del objeto que mandó Supabase
+        
+        return `- CURSO: "${t}" | DETALLE: ${d} | LINK: ${BASE_URL}/${id}`;
+      }).join('\n');
+    }
+
+    // 4. Configurar IA
     const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-    // 2. Configuramos el modelo (usando la versión estable que Google recomienda)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 5. Iniciar Chat con Instrucciones Híbridas
+    const chat = model.startChat({
+      history: [
+        {
+          role: "user",
+          parts: [{ text: `Actúa como un experto de TAE (Taller de Actualización Empresarial). 
+          
+          CATÁLOGO INTERNO (Prioridad):
+          ${catalogoTexto}
+          
+          REGLAS:
+          1. Si preguntan por un curso de la lista, descríbelo usando el 'DETALLE' proporcionado.
+          2. Si preguntan algo general (contabilidad, fiscal, IA), responde usando tu conocimiento experto.
+          3. Responde siempre en ESPAÑOL profesional.
+          4. No inventes otros significados para la palabra "TAE".` }],
+        },
+        {
+          role: "model",
+          parts: [{ text: "Entendido. Soy el asistente de TAE. Responderé basándome en el catálogo de cursos y en mi conocimiento general para ayudarte. ¿Qué deseas consultar?" }],
+        },
+      ],
+    });
 
-    // 3. Generamos el contenido
-    const result = await model.generateContent(query);
+    const promptText = typeof query === 'string' ? query.trim() : "";
+    if (!promptText) throw new Error("La consulta está vacía.");
+
+    // 6. Enviar mensaje y responder
+    const result = await chat.sendMessage(promptText);
     const response = await result.response;
     const text = response.text();
 
     return new Response(JSON.stringify({ answer: text }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
+  
   } catch (err: any) {
-    return new Response(JSON.stringify({ 
-      error: "Error en la ejecución", 
-      detalle: err.message 
-    }), { status: 200, headers: corsHeaders });
+    console.error("Error en Edge Function:", err.message);
+    
+    return new Response(
+      JSON.stringify({ 
+        error: "Error en la ejecución de la IA", 
+        detalle: err.message 
+      }), 
+      { 
+        status: 200, // Mantenemos 200 para que el frontend maneje el mensaje de error suavemente
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
   }
 })

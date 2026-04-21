@@ -24,34 +24,33 @@ const Dashboard = () => {
   }, []);
 
   const handleSearch = async () => {
-  if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    setAnswer("");
 
-  setIsSearching(true);
-  setAnswer("");
+    try {
+      // VALIDACIÓN: Forzamos el envío de un JSON limpio
+      const { data, error } = await supabase.functions.invoke('tae-search', {
+        body: JSON.stringify({ query: searchQuery.trim(), context: courses }), // Enviamos como string para evitar errores de parseo
+        headers: { "Content-Type": "application/json" }
+      });
 
-  try {
-    // VALIDACIÓN: Forzamos el envío de un JSON limpio
-    const { data, error } = await supabase.functions.invoke('tae-search', {
-      body: JSON.stringify({ query: searchQuery.trim() }), // Enviamos como string para evitar errores de parseo
-      headers: { "Content-Type": "application/json" }
-    });
+      if (error) throw error;
 
-    if (error) throw error;
+      if (data?.error) {
+        setAnswer(`Google respondió: ${data.error}`);
+      } else {
+        setAnswer(data.answer);
+      }
 
-    if (data?.error) {
-      setAnswer(`Google respondió: ${data.error}`);
-    } else {
-      setAnswer(data.answer);
+    } catch (err) {
+      console.error("Error detallado:", err);
+      // Aquí validamos si el error es de red o de la función
+      setAnswer("Error al conectar con la IA. Por favor, revisa la consola para más detalles.");
+    } finally {
+      setIsSearching(false);
     }
-
-  } catch (err) {
-    console.error("Error detallado:", err);
-    // Aquí validamos si el error es de red o de la función
-    setAnswer("Error al conectar con la IA. Por favor, revisa la consola para más detalles.");
-  } finally {
-    setIsSearching(false);
-  }
-};
+  };
 
   const fetchCourses = async () => {
     setFetchingCourses(true);
@@ -78,7 +77,7 @@ const Dashboard = () => {
             onClick={() => setActiveTab('tae')}
             style={activeTab === 'tae' ? styles.tabActive : styles.tabInactive}
           >
-            TAE Inteligencia
+            TAE
           </button>
           <button
             onClick={() => setActiveTab('cursos')}
@@ -175,12 +174,28 @@ const Dashboard = () => {
 // ESTILOS PARA LOOK MINIMALISTA
 const styles = {
   tabActive: {
-    background: 'none', border: 'none', borderBottom: '2px solid #000',
-    paddingBottom: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '1.1rem'
+    background: 'none',
+    // En lugar de 'border: none', definimos cada lado
+    borderTop: '2px solid transparent',
+    borderLeft: '2px solid transparent',
+    borderRight: '2px solid transparent',
+    borderBottom: '2px solid #000', // El borde que sí queremos ver
+    paddingBottom: '8px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    fontSize: '1.1rem'
   },
   tabInactive: {
-    background: 'none', border: 'none', color: '#aaa',
-    paddingBottom: '8px', cursor: 'pointer', fontSize: '1.1rem'
+    background: 'none',
+    // Usamos exactamente las mismas propiedades, pero todas transparentes
+    borderTop: '2px solid transparent',
+    borderLeft: '2px solid transparent',
+    borderRight: '2px solid transparent',
+    borderBottom: '2px solid transparent', // Aquí lo "ocultamos" con transparencia
+    color: '#aaa',
+    paddingBottom: '8px',
+    cursor: 'pointer',
+    fontSize: '1.1rem'
   },
   searchContainer: {
     border: '1px solid #e0e0e0', borderRadius: '24px',
