@@ -29,11 +29,17 @@ const Dashboard = () => {
     setAnswer("");
 
     try {
-      console.log("nos vemos")
+      let contextoCursos = courses;
+      if (courses.length === 0) {
+          const { data } = await supabase.from('courses').select('*');
+          contextoCursos = data || [];
+      }
       // VALIDACIÓN: Forzamos el envío de un JSON limpio
       const { data, error } = await supabase.functions.invoke('tae-search', {
-        body: JSON.stringify({ query: searchQuery.trim(), context: courses }), // Enviamos como string para evitar errores de parseo
-        headers: { "Content-Type": "application/json" }
+        body: { 
+          query: searchQuery.trim(), 
+          context: contextoCursos // Usamos la variable que acabamos de validar
+        }
       });
 
       if (error) throw error;
