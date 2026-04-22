@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 serve(async (req: Request) => {
+  console.log("--- ¡LA FUNCIÓN SE ESTÁ EJECUTANDO! ---");
   // 1. Manejo de Preflight (CORS) - Siempre al inicio
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 

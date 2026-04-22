@@ -38,6 +38,7 @@ const Dashboard = () => {
     try {
       // 2. Ahora enviamos directamente el estado 'courses'
       // Supabase ya sabe que es un objeto, no hace falta stringify
+      console.log("Invocando función con contexto:", contextoCursos);
       const { data, error } = await supabase.functions.invoke('tae-search', {
         body: { 
           query: searchQuery.trim(), 
