@@ -25,39 +25,37 @@ const Dashboard = () => {
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
+    
+    // 1. Si por alguna razón los cursos aún no cargan, los traemos primero
+    // Pero usamos la función fetchCourses que ya tienes definida
+    if (courses.length === 0) {
+        await fetchCourses(); 
+    }
+
     setIsSearching(true);
     setAnswer("");
 
     try {
-      let contextoCursos = courses;
-      if (courses.length === 0) {
-          const { data } = await supabase.from('courses').select('*');
-          contextoCursos = data || [];
-      }
-      // VALIDACIÓN: Forzamos el envío de un JSON limpio
+      // 2. Ahora enviamos directamente el estado 'courses'
+      // Supabase ya sabe que es un objeto, no hace falta stringify
       const { data, error } = await supabase.functions.invoke('tae-search', {
         body: { 
           query: searchQuery.trim(), 
-          context: contextoCursos // Usamos la variable que acabamos de validar
+          context: courses // React ya actualizó esto si llamaste a fetchCourses arriba
         }
       });
 
       if (error) throw error;
 
-      if (data?.error) {
-        setAnswer(`Google respondió: ${data.error}`);
-      } else {
-        setAnswer(data.answer);
-      }
+      setAnswer(data?.error ? `Error: ${data.error}` : data.answer);
 
     } catch (err) {
-      console.error("Error detallado:", err);
-      // Aquí validamos si el error es de red o de la función
-      setAnswer("Error al conectar con la IA. Por favor, revisa la consola para más detalles.");
+      console.error("Error:", err);
+      setAnswer("Error al conectar con la IA.");
     } finally {
       setIsSearching(false);
     }
-  };
+};
 
   const fetchCourses = async () => {
     setFetchingCourses(true);
