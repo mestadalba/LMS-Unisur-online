@@ -26,17 +26,27 @@ serve(async (req: Request) => {
     // Cambia tu bloque de procesamiento por este que es más robusto:
     let catalogoTexto = "No hay cursos disponibles actualmente.";
 
-    if (context && Array.isArray(context)) {
+    if (context && Array.isArray(context) && context.length > 0) {
       catalogoTexto = context.map((curso: any) => {
-        // Forzamos la lectura incluso si las llaves vienen distintas
-        const t = (curso.title || curso.Title || "Sin Título").trim();
-        const d = (curso.description || curso.Description || "Sin Descripción").trim();
-        const id = curso.id;
+        // 1. Buscamos el título en todas las variantes posibles
+        const t = (curso.title || curso.Title || curso.name || "Sin Título").toString().trim();
+        
+        // 2. Buscamos la descripción
+        const d = (curso.description || curso.Description || "Sin Descripción").toString().trim();
+        
+        // 3. El ID es vital para el link
+        const id = curso.id || "";
         
         return `- CURSO: "${t}" | DETALLE: ${d} | LINK: ${BASE_URL}/${id}`;
       }).join('\n');
+    } else {
+      console.log("ALERTA: El contexto llegó vacío o no es un array.");
     }
-    console.log("Catálogo procesado para la IA:", catalogoTexto); // Revisa esto en los logs de Supabase
+
+    // ESTO ES CLAVE: Mira el log en el Dashboard de Supabase
+    console.log("--- DEBUG CATÁLOGO ---");
+    console.log(catalogoTexto);
+    console.log("----------------------");
 
     // 4. Configurar IA
     const genAI = new GoogleGenerativeAI(apiKey);
