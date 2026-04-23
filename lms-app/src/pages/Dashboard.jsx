@@ -36,7 +36,7 @@ const Dashboard = () => {
   try {
     const { data, error } = await supabase.functions.invoke('tae-search', {
       body: { 
-        query: searchQuery.trim(), 
+        query: searchQuery.trim().substring(0, 1000), 
         context: courses,
         // Agregamos esta bandera para que la Edge Function sepa qué hacer
         mode: "hybrid", // "hybrid" suele usarse para indicar Interno + Web
