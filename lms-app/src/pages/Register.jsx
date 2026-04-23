@@ -13,6 +13,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const assignedRole = matricula.trim() !== "" ? 'alumno' : 'externo';
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -20,6 +21,8 @@ const Register = () => {
       options: {
         data: {
           full_name: fullName,
+          role: assignedRole,
+          matricula: matricula.trim() || null,
         },
       },
     });

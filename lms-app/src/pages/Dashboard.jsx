@@ -33,11 +33,16 @@ const Dashboard = () => {
   setIsSearching(true);
   setAnswer("");
 
+  const contextoReducido = courses.map(c => ({
+    titulo: c.title,
+    descripcion: c.description
+  }));
+
   try {
     const { data, error } = await supabase.functions.invoke('tae-search', {
       body: { 
         query: searchQuery.trim(), 
-        context: courses,
+        context: contextoReducido,
         // Agregamos esta bandera para que la Edge Function sepa qué hacer
         mode: "hybrid", // "hybrid" suele usarse para indicar Interno + Web
         search_web: true 
