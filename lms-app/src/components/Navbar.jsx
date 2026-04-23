@@ -18,7 +18,7 @@ export default function Navbar({ profile }) {
       justifyContent: 'space-between',
       alignItems: 'center'
     }}>
-      <h3 style={{ margin: 0 }}>TAE | LMS</h3>
+      <h3 style={{ margin: 0 }}> TAE | LMS</h3>
 
       <div style={{ display: 'flex', gap: '20px' }}>
         <span onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>

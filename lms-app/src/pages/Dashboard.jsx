@@ -23,39 +23,36 @@ const Dashboard = () => {
     fetchCourses();
   }, []);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    
-    // 1. Si por alguna razón los cursos aún no cargan, los traemos primero
-    // Pero usamos la función fetchCourses que ya tienes definida
-    if (courses.length === 0) {
-        await fetchCourses(); 
-    }
+ const handleSearch = async () => {
+  if (!searchQuery.trim()) return;
 
-    setIsSearching(true);
-    setAnswer("");
+  if (courses.length === 0) {
+    await fetchCourses();
+  }
 
-    try {
-      // 2. Ahora enviamos directamente el estado 'courses'
-      // Supabase ya sabe que es un objeto, no hace falta stringify
-      console.log("Invocando función con contexto:", contextoCursos);
-      const { data, error } = await supabase.functions.invoke('tae-search', {
-        body: { 
-          query: searchQuery.trim(), 
-          context: courses // React ya actualizó esto si llamaste a fetchCourses arriba
-        }
-      });
+  setIsSearching(true);
+  setAnswer("");
 
-      if (error) throw error;
+  try {
+    const { data, error } = await supabase.functions.invoke('tae-search', {
+      body: { 
+        query: searchQuery.trim(), 
+        context: courses,
+        // Agregamos esta bandera para que la Edge Function sepa qué hacer
+        mode: "hybrid", // "hybrid" suele usarse para indicar Interno + Web
+        search_web: true 
+      }
+    });
 
-      setAnswer(data?.error ? `Error: ${data.error}` : data.answer);
+    if (error) throw error;
+    setAnswer(data?.error ? `Error: ${data.error}` : data.answer);
 
-    } catch (err) {
-      console.error("Error:", err);
-      setAnswer("Error al conectar con la IA.");
-    } finally {
-      setIsSearching(false);
-    }
+  } catch (err) {
+    console.error("Error:", err);
+    setAnswer("Error al conectar con la IA.");
+  } finally {
+    setIsSearching(false);
+  }
 };
 
   const fetchCourses = async () => {
@@ -109,12 +106,13 @@ const Dashboard = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
-                 <button 
-  onClick={handleSearch} // <--- Vinculamos la función aquí
-  disabled={isSearching}
->
-  {isSearching ? 'Consultando...' : 'Consultar TAE'}
-</button>
+                <button 
+                  onClick={handleSearch} 
+                  disabled={isSearching}
+                  style={styles.btnPrimary} // Añade esta línea para que use tus estilos minimalistas
+                >
+                  {isSearching ? 'Consultando...' : 'Consultar TAE'}
+                </button>
                 </div>
                 {/* ESTE BLOQUE MUESTRA LA RESPUESTA EN PANTALLA  */}
                 
@@ -128,7 +126,7 @@ const Dashboard = () => {
                     textAlign: 'left',
                     lineHeight: '1.6'
                   }}>
-                    <strong style={{ display: 'block', marginBottom: '10px' }}>TAE Inteligencia:</strong>
+                    <strong style={{ display: 'block', marginBottom: '10px' }}>Tutor autómata educativo:</strong>
                     <p style={{ whiteSpace: 'pre-wrap' }}>{answer}</p>
                   </div>
                 )}

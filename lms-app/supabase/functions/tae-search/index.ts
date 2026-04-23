@@ -58,7 +58,7 @@ serve(async (req: Request) => {
       history: [
         {
           role: "user",
-          parts: [{ text: `Actúa como un experto de TAE (Taller de Actualización Empresarial). 
+          parts: [{ text: `TAE (Tutor autómata educativo). 
           
           CATÁLOGO INTERNO (Prioridad):
           ${catalogoTexto}
