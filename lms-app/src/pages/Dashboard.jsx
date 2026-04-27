@@ -23,31 +23,33 @@ const Dashboard = () => {
     fetchCourses();
   }, []);
 
-  const handleSearch = async () => {
+ const handleSearch = async () => {
   if (!searchQuery.trim()) return;
+
+  if (courses.length === 0) {
+    await fetchCourses();
+  }
 
   setIsSearching(true);
   setAnswer("");
 
   try {
-    // VALIDACIÓN: Forzamos el envío de un JSON limpio
     const { data, error } = await supabase.functions.invoke('tae-search', {
-      body: JSON.stringify({ query: searchQuery.trim() }), // Enviamos como string para evitar errores de parseo
-      headers: { "Content-Type": "application/json" }
+      body: { 
+        query: searchQuery.trim().substring(0, 1000), 
+        context: courses,
+        // Agregamos esta bandera para que la Edge Function sepa qué hacer
+        mode: "hybrid", // "hybrid" suele usarse para indicar Interno + Web
+        search_web: true 
+      }
     });
 
     if (error) throw error;
-
-    if (data?.error) {
-      setAnswer(`Google respondió: ${data.error}`);
-    } else {
-      setAnswer(data.answer);
-    }
+    setAnswer(data?.error ? `Error: ${data.error}` : data.answer);
 
   } catch (err) {
-    console.error("Error detallado:", err);
-    // Aquí validamos si el error es de red o de la función
-    setAnswer("Error al conectar con la IA. Por favor, revisa la consola para más detalles.");
+    console.error("Error:", err);
+    setAnswer("Error al conectar con la IA.");
   } finally {
     setIsSearching(false);
   }
@@ -78,7 +80,7 @@ const Dashboard = () => {
             onClick={() => setActiveTab('tae')}
             style={activeTab === 'tae' ? styles.tabActive : styles.tabInactive}
           >
-            TAE Inteligencia
+            TAE
           </button>
           <button
             onClick={() => setActiveTab('cursos')}
@@ -104,12 +106,13 @@ const Dashboard = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
-                 <button 
-  onClick={handleSearch} // <--- Vinculamos la función aquí
-  disabled={isSearching}
->
-  {isSearching ? 'Consultando...' : 'Consultar TAE'}
-</button>
+                <button 
+                  onClick={handleSearch} 
+                  disabled={isSearching}
+                  style={styles.btnPrimary} // Añade esta línea para que use tus estilos minimalistas
+                >
+                  {isSearching ? 'Consultando...' : 'Consultar TAE'}
+                </button>
                 </div>
                 {/* ESTE BLOQUE MUESTRA LA RESPUESTA EN PANTALLA  */}
                 
@@ -123,7 +126,7 @@ const Dashboard = () => {
                     textAlign: 'left',
                     lineHeight: '1.6'
                   }}>
-                    <strong style={{ display: 'block', marginBottom: '10px' }}>TAE Inteligencia:</strong>
+                    <strong style={{ display: 'block', marginBottom: '10px' }}>Tutor autómata educativo:</strong>
                     <p style={{ whiteSpace: 'pre-wrap' }}>{answer}</p>
                   </div>
                 )}
@@ -175,12 +178,28 @@ const Dashboard = () => {
 // ESTILOS PARA LOOK MINIMALISTA
 const styles = {
   tabActive: {
-    background: 'none', border: 'none', borderBottom: '2px solid #000',
-    paddingBottom: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '1.1rem'
+    background: 'none',
+    // En lugar de 'border: none', definimos cada lado
+    borderTop: '2px solid transparent',
+    borderLeft: '2px solid transparent',
+    borderRight: '2px solid transparent',
+    borderBottom: '2px solid #000', // El borde que sí queremos ver
+    paddingBottom: '8px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    fontSize: '1.1rem'
   },
   tabInactive: {
-    background: 'none', border: 'none', color: '#aaa',
-    paddingBottom: '8px', cursor: 'pointer', fontSize: '1.1rem'
+    background: 'none',
+    // Usamos exactamente las mismas propiedades, pero todas transparentes
+    borderTop: '2px solid transparent',
+    borderLeft: '2px solid transparent',
+    borderRight: '2px solid transparent',
+    borderBottom: '2px solid transparent', // Aquí lo "ocultamos" con transparencia
+    color: '#aaa',
+    paddingBottom: '8px',
+    cursor: 'pointer',
+    fontSize: '1.1rem'
   },
   searchContainer: {
     border: '1px solid #e0e0e0', borderRadius: '24px',

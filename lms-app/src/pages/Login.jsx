@@ -27,7 +27,9 @@ const Login = () => {
 
   return (
     <div style={{ maxWidth: '400px', margin: 'auto', padding: '2rem' }}>
-      <h2>Iniciar Sesión - LMS</h2>
+      <img src='/logotipo.png' alt='TAE' />
+      <h2>TAE | LMS</h2>
+      <h3>Iniciar sesiòn</h3>
       <form onSubmit={handleLogin}>
         <div style={{ marginBottom: '1rem' }}>
           <input 
@@ -52,7 +54,7 @@ const Login = () => {
         <button 
           type="submit" 
           disabled={loading}
-          style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          style={{ width: '100%', margin:'10px', padding: '10px', backgroundColor: '#2D2D3A', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer' }}
         >
           {loading ? 'Entrando...' : 'Iniciar Sesión'}
         </button>

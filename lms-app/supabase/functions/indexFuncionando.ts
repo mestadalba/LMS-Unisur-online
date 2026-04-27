@@ -7,7 +7,6 @@ const corsHeaders = {
 }
 
 serve(async (req: Request) => {
-  console.log("--- ¡LA FUNCIÓN SE ESTÁ EJECUTANDO! ---");
   // 1. Manejo de Preflight (CORS) - Siempre al inicio
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -20,34 +19,21 @@ serve(async (req: Request) => {
     
     // --- CONFIGURACIÓN DE TU URL ---
     // Cambia esto por la URL real de tu Dashboard donde se ven los cursos
-    const BASE_URL = "https://tae-lms-unisur-online.vercel.app/courses";
+    const BASE_URL = "http://localhost:5173/courses";
 
     // 3. Procesar el catálogo de cursos (Contexto)
     // Lo hacemos AQUÍ, después de recibir el 'context' del req.json()
-    // Cambia tu bloque de procesamiento por este que es más robusto:
     let catalogoTexto = "No hay cursos disponibles actualmente.";
 
-    if (context && Array.isArray(context) && context.length > 0) {
+    if (context && Array.isArray(context)) {
       catalogoTexto = context.map((curso: any) => {
-        // 1. Buscamos el título en todas las variantes posibles
-        const t = (curso.title || curso.Title || curso.name || "Sin Título").toString().trim();
-        
-        // 2. Buscamos la descripción
-        const d = (curso.description || curso.Description || "Sin Descripción").toString().trim();
-        
-        // 3. El ID es vital para el link
-        const id = curso.id || "";
+        const t = curso.title?.trim() || "Sin Título";
+        const d = curso.description?.trim() || "Sin Descripción";
+        const id = curso.id;
         
         return `- CURSO: "${t}" | DETALLE: ${d} | LINK: ${BASE_URL}/${id}`;
       }).join('\n');
-    } else {
-      console.log("ALERTA: El contexto llegó vacío o no es un array.");
     }
-
-    // ESTO ES CLAVE: Mira el log en el Dashboard de Supabase
-    console.log("--- DEBUG CATÁLOGO ---");
-    console.log(catalogoTexto);
-    console.log("----------------------");
 
     // 4. Configurar IA
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -58,7 +44,7 @@ serve(async (req: Request) => {
       history: [
         {
           role: "user",
-          parts: [{ text: `TAE (Tutor autómata educativo). 
+          parts: [{ text: `Actúa como un experto de TAE (Taller de Actualización Empresarial). 
           
           CATÁLOGO INTERNO (Prioridad):
           ${catalogoTexto}
