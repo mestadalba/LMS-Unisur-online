@@ -13,7 +13,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const assignedRole = matricula.trim() !== "" ? 'alumno' : 'externo';
+    //const assignedRole = matricula.trim() !== "" ? 'alumno' : 'externo';
     const assignedRole = 'admin';
 
     const { data, error } = await supabase.auth.signUp({
