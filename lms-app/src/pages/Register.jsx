@@ -74,7 +74,7 @@ const Register = () => {
         >
           {loading ? 'Registrando...' : 'Crear Cuenta'}
         </button>
-      </form>
+      </form> 
       <p>
         ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
       </p>
