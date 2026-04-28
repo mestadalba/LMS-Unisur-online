@@ -42,7 +42,7 @@ const CreateCourse = () => {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <input 
           type="text" 
-          placeholder="Título del curso (ej: React Básico)" 
+          placeholder="Introducción, presentación y conceptualización primer módulo - VIDEO  (ej: React Básico)" 
           value={title} 
           onChange={(e) => setTitle(e.target.value)} 
           required 

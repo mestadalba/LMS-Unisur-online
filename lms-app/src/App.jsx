@@ -1,39 +1,94 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { supabase } from './lib/supabaseClient';
 
-const DocenteDashboard = () => {
-  const [cursos, setCursos] = useState([]);
+import Register from './pages/Register';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import CreateCourse from './pages/CreateCourse';
+import Profile from './pages/Profile';
+import DocenteDashboard from './pages/DocenteDashboard'; // Verifica que el archivo exista en esa ruta
 
-  // Solo cargar cursos creados por este docente
+// Componente para proteger rutas
+function PrivateRoute({ session, children }) {
+  return session ? children : <Navigate to="/login" />;
+}
+
+function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchCursos = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data } = await supabase
-        .from('cursos')
-        .select('*')
-        .eq('instructor_id', user.id); // Asumiendo que guardas quién creó el curso
-      setCursos(data);
+    // Obtener sesión actual
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
+    });
+
+    // Escuchar cambios de sesión
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
     };
-    fetchCursos();
   }, []);
 
+  if (loading) return <p>Cargando app...</p>;
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Panel de Docente</h1>
-      <button onClick={() => {/* Lógica para abrir modal de creación */}}>
-        + Crear Nuevo Curso
-      </button>
+    <Router>
+      <Routes>
+        {/* Públicas */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <section style={{ marginTop: '2rem' }}>
-        <h3>Mis Cursos</h3>
-        <ul>
-          {cursos.map(curso => (
-            <li key={curso.id}>{curso.nombre_curso}</li>
-          ))}
-        </ul>
-      </section>
-    </div>
+        {/* Privadas */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute session={session}>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/docentedashboard" 
+        element={
+          <PrivateRoute session={session}>
+            <DocenteDashboard />
+          </PrivateRoute>
+          } 
+        />
+
+        <Route
+          path="/create-course"
+          element={
+            <PrivateRoute session={session}>
+              <CreateCourse />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute session={session}>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Default */}
+        <Route
+          path="/"
+          element={<Navigate to={session ? "/dashboard" : "/login"} />}
+        />
+      </Routes>
+    </Router>
   );
-};
+}
 
-export default DocenteDashboard;
+export default App;
