@@ -12,15 +12,21 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      alert("Error al iniciar sesión: " + error.message);
-    } else {
-      navigate('/dashboard');
+    if (data?.user) {
+      const userRole = data.user.user_metadata.role;
+
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'docente') {
+        navigate('/docente-dashboard');
+      } else {
+        navigate('/dashboard'); // Para alumnos/externos
+      }
     }
     setLoading(false);
   };
