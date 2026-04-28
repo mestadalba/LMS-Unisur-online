@@ -21,9 +21,9 @@ const Login = () => {
       const userRole = data.user.user_metadata.role;
 
       if (userRole === 'admin') {
-        navigate('/admin-dashboard');
+        navigate('/dashboard');
       } else if (userRole === 'docente') {
-        navigate('/docente-dashboard');
+        navigate('/docentedashboard');
       } else {
         navigate('/dashboard'); // Para alumnos/externos
       }
