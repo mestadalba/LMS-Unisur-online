@@ -25,7 +25,7 @@ const Login = () => {
       } else if (userRole === 'docente') {
         navigate('/docentedashboard');
       } else {
-        navigate('/dashboard'); // Para alumnos/externos
+        navigate('/docentedashboard'); // Para alumnos/externos
       }
     }
     setLoading(false);
