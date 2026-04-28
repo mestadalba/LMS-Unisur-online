@@ -22,6 +22,7 @@ const Login = () => {
 
       if (userRole === 'admin') {
         navigate('/dashboard');
+        console.log("que esta haciendo")
       } else if (userRole === 'docente') {
         navigate('/docentedashboard');
       } else {
