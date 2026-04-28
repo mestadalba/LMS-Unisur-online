@@ -19,6 +19,7 @@ const Login = () => {
 
     if (data?.user) {
       const userRole = data.user.user_metadata.role;
+      console.log(userRole)
 
       if (userRole === 'admin') {
         navigate('/dashboard');
