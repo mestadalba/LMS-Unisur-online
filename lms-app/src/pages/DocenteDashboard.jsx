@@ -1,39 +1,66 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useProfile } from '../hooks/useProfile';
+import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar'; // 1. Importa el componente
 
 const DocenteDashboard = () => {
-  const [cursos, setCursos] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { profile } = useProfile();
 
-  // Solo cargar cursos creados por este docente
-  useEffect(() => {
-    const fetchCursos = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data } = await supabase
-        .from('cursos')
-        .select('*')
-        .eq('instructor_id', user.id); // Asumiendo que guardas quién creó el curso
-      setCursos(data);
-    };
-    fetchCursos();
-  }, []);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Panel de Docente</h1>
-      <button onClick={() => {/* Lógica para abrir modal de creación */}}>
-        + Crear Nuevo Curso
-      </button>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      {/* 1. Navbar siempre arriba */}
+      <Navbar profile={profile} />
 
-      <section style={{ marginTop: '2rem' }}>
-        <h3>Mis Cursos</h3>
-        <ul>
-          {cursos.map(curso => (
-            <li key={curso.id}>{curso.nombre_curso}</li>
-          ))}
-        </ul>
-      </section>
+      <div style={{ display: 'flex', flex: 1, position: 'relative', overflow: 'hidden' }}>
+        
+        {/* 2. Botón de Control (Icono Hamburguesa) posicionado arriba a la izquierda del contenido */}
+        <button 
+          onClick={toggleSidebar}
+          style={{
+            position: 'absolute',
+            left: sidebarOpen ? '290px' : '10px', // Se mueve con el sidebar
+            top: '10px',
+            zIndex: 1100,
+            background: '#1e293b',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '8px 12px',
+            cursor: 'pointer',
+            transition: 'left 0.3s ease',
+            fontSize: '18px'
+          }}
+        >
+          {sidebarOpen ? '❮' : '☰'}
+        </button>
+
+        {/* 3. Sidebar */}
+        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+
+        {/* 4. Contenido Principal */}
+        <main style={{ 
+          flex: 1, 
+          padding: '40px', 
+          backgroundColor: '#f8fafc', 
+          overflowY: 'auto',
+          transition: 'margin-left 0.3s ease',
+          marginLeft: sidebarOpen ? '0' : '0' // Puedes ajustar si quieres que el sidebar empuje el contenido
+        }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '20px' }}>Panel de Docente</h1>
+            
+            <div style={{ background: 'white', padding: '40px', borderRadius: '15px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+               <h2 style={{ color: '#64748b' }}>Cursos Activos</h2>
+               <p style={{ marginTop: '20px', color: '#94a3b8' }}>Selecciona un tema del menú izquierdo para comenzar.</p>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
-
 export default DocenteDashboard;

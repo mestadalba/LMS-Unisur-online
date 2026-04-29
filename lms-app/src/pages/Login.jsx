@@ -9,29 +9,54 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (data?.user) {
-      const userRole = data.user.user_metadata.role;
-      console.log(userRole)
+    if (authError) throw authError;
 
-      if (userRole === 'admin') {
-        navigate('/dashboard');
-        console.log("que esta haciendo")
-      } else if (userRole === 'docente') {
-        navigate('/docentedashboard');
+    if (authData?.user) {
+      // 1. Intentamos obtener el rol desde la tabla profiles
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (profileError) {
+        console.warn("No se pudo leer la tabla profiles, usando metadata:", profileError.message);
+        // Fallback: Si falla la tabla, intentamos usar los metadatos
+        const metaRole = authData.user.user_metadata.role;
+        dirigirPorRol(metaRole);
       } else {
-        navigate('/alumnosdashboard'); // Para alumnos/externos
+        dirigirPorRol(profile.role);
       }
     }
+  } catch (error) {
+    alert("Error de acceso: " + error.message);
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
+// Función auxiliar para no repetir código
+const dirigirPorRol = (role) => {
+  console.log("Navegando como:", role);
+  const cleanRole = role?.toLowerCase().trim();
+
+  if (cleanRole === 'admin') {
+    navigate('/dashboard');
+  } else if (cleanRole === 'docente') {
+    navigate('/docentedashboard');
+  } else {
+    navigate('/alumnosdashboard');
+  }
+};
 
   return (
     <div style={{ maxWidth: '400px', margin: 'auto', padding: '2rem' }}>
