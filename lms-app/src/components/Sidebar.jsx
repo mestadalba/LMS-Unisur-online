@@ -27,6 +27,15 @@ const sidebarStyle = {
   boxShadow: isOpen ? '5px 0 15px rgba(0,0,0,0.2)' : 'none'
 };
 
+const estructuraModulo1 = {
+  "1.1": { tipo: "video", etiqueta: "Introducción", duracion: "1-2 min" },
+  "1.2": { tipo: "texto", etiqueta: "Definición y Bases", duracion: "2 cuartillas mín." },
+  "1.3": { tipo: "video", etiqueta: "Video Explicativo", duracion: "1-2 min" },
+  "1.4": { tipo: "infografia", etiqueta: "Infografía Estructurada", duracion: "1 cuartilla min" },
+  "1.5": { tipo: "infografia", etiqueta: "Infografía Estructurada", duracion: "1 cuartilla min" },
+  "1.6": { tipo: "video", etiqueta: "Video Explicativo", duracion: "1-3 min" },
+  "glosario": { tipo: "conceptos", etiqueta: "Glosario", duracion: "Mínimo 5 conceptos" }
+};
   return (
     <aside style={sidebarStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
