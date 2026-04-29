@@ -9,7 +9,17 @@ const DocenteDashboard = () => {
   const { profile } = useProfile();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const [subtemaActivo, setSubtemaActivo] = useState(null);
 
+  const estructuraModulo1 = {
+  "1.1": { tipo: "video", etiqueta: "Concepto de emoción", duracion: "1-2 min" },
+  "1.2": { tipo: "texto", etiqueta: "Definición de conceptos", duracion: "2 cuartillas mín." },
+  "1.3": { tipo: "video", etiqueta: "Evolución histórica", duracion: "1-3 min" },
+  "1.4": { tipo: "infografia", etiqueta: "Modelo de habilidades", duracion: "1 cuartilla min" },
+  "1.5": { tipo: "infografia", etiqueta: "Modelo de competencias", duracion: "1 cuartilla min" },
+  "1.6": { tipo: "video", etiqueta: "Neurociencia", duracion: "1-3 min" },
+  "glosario": { tipo: "conceptos", etiqueta: "Glosario", duracion: "Mínimo 5 conceptos" }
+};
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       {/* 1. Navbar siempre arriba */}
@@ -56,6 +66,13 @@ const DocenteDashboard = () => {
             <div style={{ background: 'white', padding: '40px', borderRadius: '15px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
                <h2 style={{ color: '#64748b' }}>Cursos Activos</h2>
                <p style={{ marginTop: '20px', color: '#94a3b8' }}>Selecciona un tema del menú izquierdo para comenzar.</p>
+               {subtemaActivo ? (
+    <EditorContenido subtemaId={subtemaActivo} />
+  ) : (
+    <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-2xl">
+      <p className="text-slate-400">Elige un tema del Módulo 1 para empezar a cargar el contenido sugerido.</p>
+    </div>
+  )}
             </div>
           </div>
         </main>
