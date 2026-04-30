@@ -39,8 +39,9 @@ const estructuraModulo1 = {
   return (
     <aside style={sidebarStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase' }}>
-          Navegación Docente
+   
+        <h2 style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '20px' }}>
+            ESTRUCTURA DEL CURSO
         </h2>
         {/* Botón para cerrar en móvil */}
         <button onClick={toggleSidebar} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '20px', display: window.innerWidth < 768 ? 'block' : 'none' }}>
@@ -72,20 +73,23 @@ const estructuraModulo1 = {
 
         {openModulo && (
           <ul style={{ listStyle: 'none', padding: '10px 0 0 10px', margin: 0 }}>
-            {temario.map((tema, index) => (
-              <li key={index} style={{
-                fontSize: '13px',
-                color: '#cbd5e1',
-                padding: '10px 0',
-                borderBottom: '1px solid #334155',
-                cursor: 'pointer'
-              }}>
-                {tema}
+            {/* Aquí es donde la magia ocurre: el docente ve lo que él mismo creó */}
+            {lecciones.length > 0 ? (
+              lecciones.map((leccion) => (
+                <li 
+                  key={leccion.id}
+                  onClick={() => setSubtemaActivo(leccion)} 
+                  style={itemSidebarStyle}
+                >
+                  <span style={{ color: '#64748b', marginRight: '8px' }}>{leccion.order_index}</span>
+                  {leccion.title || "Sin título definido"}
+                </li>
+              ))
+            ) : (
+              <li style={{ fontSize: '12px', color: '#64748b', padding: '10px' }}>
+                Aún no has agregado temas a este módulo.
               </li>
-            ))}
-            <li style={{ color: '#fbbf24', fontWeight: 'bold', paddingTop: '15px', cursor: 'pointer', fontSize: '13px' }}>
-              ✨ GLOSARIO
-            </li>
+            )}
           </ul>
         )}
       </div>
