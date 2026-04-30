@@ -9,7 +9,9 @@ const DocenteDashboard = () => {
   const { profile } = useProfile();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const [subtemaActivo, setSubtemaActivo] = useState(null);
 
+  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       {/* 1. Navbar siempre arriba */}
@@ -57,14 +59,14 @@ const DocenteDashboard = () => {
                <h2 style={{ color: '#64748b' }}>Cursos Activos</h2>
                <p style={{ marginTop: '20px', color: '#94a3b8' }}>Selecciona un tema del menú izquierdo para comenzar.</p>
                {subtemaActivo ? (
-                <EditorContenido subtemaId={subtemaActivo} />
-              ) : (
-                <div style={{ textAlign: 'center', color: '#94a3b8' }}>
-                  <img src="icono-guia.png" style={{ opacity: 0.5 }} />
-                  <h2>Bienvenido al Gestor de Módulos</h2>
-                  <p>Haz clic en cualquier punto del Módulo I para empezar a cargar el material.</p>
-                </div>
-              )}
+                  <EditorContenido subtemaId={subtemaActivo} />
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+                    <img src="icono-guia.png" style={{ opacity: 0.5 }} />
+                    <h2>Bienvenido al Gestor de Módulos</h2>
+                    <p>Haz clic en cualquier punto del Módulo I para empezar a cargar el material.</p>
+                  </div>
+                )}
             </div>
           </div>
         </main>
