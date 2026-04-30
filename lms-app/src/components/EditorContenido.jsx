@@ -5,6 +5,31 @@ const EditorContenido = ({ subtemaId }) => {
 
   if (!config) return <div className="p-10 text-center">Selecciona un tema para editar.</div>;
 
+const guardarContenido = async (datosDelFormulario) => {
+  // 1. Obtener el usuario actual
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // 2. Insertar en la tabla 'lessons' vinculándolo al curso actual
+  const { data, error } = await supabase
+    .from('lessons')
+    .insert([
+      {
+        course_id: idDelCursoActual, // El ID del curso que el docente está editando
+        title: config.etiqueta,
+        content_type: config.tipo, // 'video', 'texto', o 'infografia'
+        body_text: datosDelFormulario.texto, // Para las 2 cuartillas
+        content_url: datosDelFormulario.url, // Para los videos de 1-3 min
+        order_index: parseFloat(subtemaId) // Usa 1.1, 1.2 para el orden
+      }
+    ]);
+
+  if (error) {
+    alert("Error al guardar: " + error.message);
+  } else {
+    alert("¡Contenido del Módulo 1 guardado correctamente!");
+  }
+};
+
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
       <h2 className="text-2xl font-bold text-slate-800">Cargar: {config.etiqueta}</h2>
