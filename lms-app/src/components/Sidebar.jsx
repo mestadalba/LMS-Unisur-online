@@ -1,100 +1,29 @@
-import { useState } from 'react';
+// Sidebar.jsx
+// Verifica que estas llaves { lecciones, ... } existan aquí:
+const Sidebar = ({ isOpen, lecciones, setSubtemaActivo, toggleSidebar }) => {
+  const [openModulo, setOpenModulo] = useState(true);
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
- const [openModulo, setOpenModulo] = useState(false); // Inicia cerrado
-  const temario = [
-    "1.1 Concepto de emoción: bases biológicas y psicológicas",
-    "1.2 Diferencia entre emoción, sentimiento y estado de ánimo",
-    "1.3 Evolución histórica de la Inteligencia Emocional",
-    "1.4 Modelo de habilidades de Salovey y Mayer",
-    "1.5 Modelo de competencias de Daniel Goleman",
-    "1.6 Neurociencia de las emociones"
-  ];
-
-  // Estilo para el contenedor lateral (se oculta a la izquierda)
-const sidebarStyle = {
-  width: '280px',
-  height: 'calc(100vh - 64px)', // Resta la altura aproximada de la Navbar
-  backgroundColor: '#1e293b',
-  color: 'white',
-  position: 'absolute',
-  top: '0', // Inicia justo donde termina la Navbar en el contenedor flex
-  left: isOpen ? '0' : '-280px',
-  transition: 'left 0.3s ease',
-  zIndex: 1000,
-  padding: '20px',
-  boxSizing: 'border-box',
-  boxShadow: isOpen ? '5px 0 15px rgba(0,0,0,0.2)' : 'none'
-};
-
-const estructuraModulo1 = {
-  "1.1": { tipo: "video", etiqueta: "Introducción", duracion: "1-2 min" },
-  "1.2": { tipo: "texto", etiqueta: "Definición y Bases", duracion: "2 cuartillas mín." },
-  "1.3": { tipo: "video", etiqueta: "Video Explicativo", duracion: "1-2 min" },
-  "1.4": { tipo: "infografia", etiqueta: "Infografía Estructurada", duracion: "1 cuartilla min" },
-  "1.5": { tipo: "infografia", etiqueta: "Infografía Estructurada", duracion: "1 cuartilla min" },
-  "1.6": { tipo: "video", etiqueta: "Video Explicativo", duracion: "1-3 min" },
-  "glosario": { tipo: "conceptos", etiqueta: "Glosario", duracion: "Mínimo 5 conceptos" }
-};
   return (
-    <aside style={sidebarStyle}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-   
-        <h2 style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '20px' }}>
-            ESTRUCTURA DEL CURSO
-        </h2>
-        {/* Botón para cerrar en móvil */}
-        <button onClick={toggleSidebar} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '20px', display: window.innerWidth < 768 ? 'block' : 'none' }}>
-          ✕
-        </button>
-      </div>
-      
-      <div style={{ marginBottom: '10px' }}>
-        <button 
-          onClick={() => setOpenModulo(!openModulo)}
-          style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#334155',
-            color: 'white',
-            border: 'none',
-            padding: '12px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            textAlign: 'left'
-          }}
-        >
-          <span style={{ fontSize: '13px' }}>MÓDULO I. FUNDAMENTOS</span>
-          <span>{openModulo ? '▼' : '▶'}</span>
-        </button>
+    <aside style={{
+      left: isOpen ? '0' : '-280px',
+      // ... resto de tus estilos
+    }}>
+      {/* ... cabecera ... */}
 
-        // Sidebar.jsx (Fragmento de la lista)
-{openModulo && (
-  <ul style={{ listStyle: 'none', padding: '10px' }}>
-    {lecciones.map((lec) => (
-      <li 
-        key={lec.id}
-        onClick={() => setSubtemaActivo(lec)}
-        style={{
-          padding: '12px',
-          cursor: 'pointer',
-          color: '#cbd5e1',
-          borderBottom: '1px solid #334155',
-          fontSize: '13px'
-        }}
-      >
-        <span className="mr-2 text-blue-400">{lec.order_index}</span>
-        {lec.title || "Nuevo Punto..."}
-      </li>
-    ))}
-  </ul>
-)}
-      </div>
+      {openModulo && (
+        <ul style={{ listStyle: 'none', padding: '10px' }}>
+          {/* 4. Ahora 'lecciones' ya está definido porque llega por props */}
+          {lecciones && lecciones.map((lec) => (
+            <li 
+              key={lec.id}
+              onClick={() => setSubtemaActivo(lec)}
+              style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #334155' }}
+            >
+              {lec.order_index} {lec.title}
+            </li>
+          ))}
+        </ul>
+      )}
     </aside>
   );
 };
-
-export default Sidebar;
