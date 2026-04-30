@@ -4,7 +4,7 @@ import { useProfile } from '../hooks/useProfile';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar'; // 1. Importa el componente
 import EditorContenido from '../components/EditorContenido';
-
+import Modulos from '../components/Modulos';
 
 const DocenteDashboard = () => {
   const [lecciones, setLecciones] = useState([]); // Importante: inicializar con []
