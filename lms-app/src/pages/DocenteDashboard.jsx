@@ -51,7 +51,7 @@ const DocenteDashboard = () => {
               </h2>
               <Modulos onLeccionCreada={manejarNuevaLeccion} />
             </section>
-
+ 
             <hr style={{ margin: '40px 0', borderColor: '#e2e8f0' }} />
 
             {/* 2. EDITOR DE CONTENIDO (Video/Texto) */}
