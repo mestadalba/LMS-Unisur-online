@@ -3,14 +3,27 @@ import { supabase } from '../lib/supabaseClient';
 import { useProfile } from '../hooks/useProfile';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar'; // 1. Importa el componente
+import EditorContenido from '../components/EditorContenido';
 
 const DocenteDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { profile } = useProfile();
+  const [lecciones, setLecciones] = useState([]);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const [subtemaActivo, setSubtemaActivo] = useState(null);
 
+  // 1. Cargar las lecciones existentes de Supabase al entrar
+  useEffect(() => {
+    const fetchLecciones = async () => {
+      const { data } = await supabase
+        .from('lessons')
+        .select('*')
+        .order('order_index', { ascending: true });
+      if (data) setLecciones(data);
+    };
+    fetchLecciones();
+  }, []);
   
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
@@ -41,8 +54,12 @@ const DocenteDashboard = () => {
         </button>
 
         {/* 3. Sidebar */}
-        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          lecciones={lecciones} 
+           toggleSidebar={toggleSidebar}
+          setSubtemaActivo={setSubtemaActivo} 
+        />
         {/* 4. Contenido Principal */}
         <main style={{ 
           flex: 1, 
@@ -59,14 +76,16 @@ const DocenteDashboard = () => {
                <h2 style={{ color: '#64748b' }}>Cursos Activos</h2>
                <p style={{ marginTop: '20px', color: '#94a3b8' }}>Selecciona un tema del menú izquierdo para comenzar.</p>
                {subtemaActivo ? (
-                  <EditorContenido subtemaId={subtemaActivo} />
-                ) : (
-                  <div style={{ textAlign: 'center', color: '#94a3b8' }}>
-                    <img src="icono-guia.png" style={{ opacity: 0.5 }} />
-                    <h2>Bienvenido al Gestor de Módulos</h2>
-                    <p>Haz clic en cualquier punto del Módulo I para empezar a cargar el material.</p>
-                  </div>
-                )}
+            <EditorContenido 
+              leccion={subtemaActivo} 
+              onSave={() => {/* Función para refrescar la lista */}}
+            />
+          ) : (
+            <div style={{ textAlign: 'center', marginTop: '100px' }}>
+              <h1 className="text-2xl font-bold">Gestor de Módulos</h1>
+              <p className="text-gray-500">Selecciona un punto del menú para editar título y contenido.</p>
+            </div>
+          )}
             </div>
           </div>
         </main>

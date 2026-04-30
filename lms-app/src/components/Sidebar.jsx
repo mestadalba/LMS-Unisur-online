@@ -71,27 +71,27 @@ const estructuraModulo1 = {
           <span>{openModulo ? '▼' : '▶'}</span>
         </button>
 
-        {openModulo && (
-          <ul style={{ listStyle: 'none', padding: '10px 0 0 10px', margin: 0 }}>
-            {/* Aquí es donde la magia ocurre: el docente ve lo que él mismo creó */}
-            {lecciones.length > 0 ? (
-              lecciones.map((leccion) => (
-                <li 
-                  key={leccion.id}
-                  onClick={() => setSubtemaActivo(leccion)} 
-                  style={itemSidebarStyle}
-                >
-                  <span style={{ color: '#64748b', marginRight: '8px' }}>{leccion.order_index}</span>
-                  {leccion.title || "Sin título definido"}
-                </li>
-              ))
-            ) : (
-              <li style={{ fontSize: '12px', color: '#64748b', padding: '10px' }}>
-                Aún no has agregado temas a este módulo.
-              </li>
-            )}
-          </ul>
-        )}
+        // Sidebar.jsx (Fragmento de la lista)
+{openModulo && (
+  <ul style={{ listStyle: 'none', padding: '10px' }}>
+    {lecciones.map((lec) => (
+      <li 
+        key={lec.id}
+        onClick={() => setSubtemaActivo(lec)}
+        style={{
+          padding: '12px',
+          cursor: 'pointer',
+          color: '#cbd5e1',
+          borderBottom: '1px solid #334155',
+          fontSize: '13px'
+        }}
+      >
+        <span className="mr-2 text-blue-400">{lec.order_index}</span>
+        {lec.title || "Nuevo Punto..."}
+      </li>
+    ))}
+  </ul>
+)}
       </div>
     </aside>
   );
