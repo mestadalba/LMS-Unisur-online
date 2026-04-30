@@ -1,23 +1,23 @@
 // Sidebar.jsx
-// Verifica que estas llaves { lecciones, ... } existan aquí:
-const Sidebar = ({ isOpen, lecciones, setSubtemaActivo, toggleSidebar }) => {
+
+// 3. ASEGÚRATE de incluir { lecciones } entre las llaves de los parámetros
+const Sidebar = ({ isOpen, lecciones, setSubtemaActivo }) => {
   const [openModulo, setOpenModulo] = useState(true);
 
   return (
-    <aside style={{
-      left: isOpen ? '0' : '-280px',
-      // ... resto de tus estilos
-    }}>
-      {/* ... cabecera ... */}
+    <aside style={{ display: isOpen ? 'block' : 'none' }}>
+      <button onClick={() => setOpenModulo(!openModulo)}>
+        MÓDULO I. FUNDAMENTOS
+      </button>
 
       {openModulo && (
-        <ul style={{ listStyle: 'none', padding: '10px' }}>
-          {/* 4. Ahora 'lecciones' ya está definido porque llega por props */}
+        <ul>
+          {/* 4. Verifica que 'lecciones' exista antes de hacer el map */}
           {lecciones && lecciones.map((lec) => (
             <li 
-              key={lec.id}
+              key={lec.id} 
               onClick={() => setSubtemaActivo(lec)}
-              style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #334155' }}
+              style={{ cursor: 'pointer' }}
             >
               {lec.order_index} {lec.title}
             </li>
@@ -27,3 +27,5 @@ const Sidebar = ({ isOpen, lecciones, setSubtemaActivo, toggleSidebar }) => {
     </aside>
   );
 };
+
+export default Sidebar;
