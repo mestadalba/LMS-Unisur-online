@@ -11,7 +11,7 @@ const guardarContenido = async (datosDelFormulario) => {
 
   // 2. Insertar en la tabla 'lessons' vinculándolo al curso actual
   const { data, error } = await supabase
-    .from('lessons')
+    .from('lessons') 
     .insert([
       {
         course_id: idDelCursoActual, // El ID del curso que el docente está editando
