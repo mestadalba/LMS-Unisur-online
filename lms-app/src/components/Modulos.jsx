@@ -7,15 +7,27 @@ const Modulos = ({ onLeccionCreada }) => {
   const [cargando, setCargando] = useState(false);
 
   // Dentro de Modulos.jsx
+// Dentro de Modulos.jsx
 const handleCrear = async (e) => {
   e.preventDefault();
+  
+  // Limpiamos el objeto para enviar SOLO lo que la tabla 'lessons' acepta
+  const nuevaLeccion = {
+    title: titulo,
+    order_index: parseFloat(orden), // Asegúrate de que sea número si la DB lo pide así
+    // course_id: idDelCursoActual // COMENTA ESTO si marca error 400
+  };
+
   const { data, error } = await supabase
     .from('lessons')
-    .insert([{ title: titulo, order_index: orden }])
+    .insert([nuevaLeccion])
     .select();
 
-  if (data) {
-    onLeccionCreada(data[0]); // Esto es lo que llena los cuadrantes en el Dashboard
+  if (error) {
+    console.error("Detalle del error 400:", error);
+    alert("Error de validación: Revisa que los nombres de las columnas coincidan.");
+  } else if (data) {
+    onLeccionCreada(data[0]);
     setTitulo('');
     setOrden('');
   }
