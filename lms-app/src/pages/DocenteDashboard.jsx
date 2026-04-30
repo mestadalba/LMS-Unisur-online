@@ -1,3 +1,11 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { useProfile } from '../hooks/useProfile';
+import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar'; // 1. Importa el componente
+import EditorContenido from '../components/EditorContenido';
+import Modulos from '../components/Modulos';
+
 // DocenteDashboard.jsx
 const DocenteDashboard = () => {
   const [lecciones, setLecciones] = useState([]);
@@ -67,3 +75,4 @@ const DocenteDashboard = () => {
     </div>
   );
 };
+export default DocenteDashboard;
