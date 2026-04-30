@@ -6,46 +6,20 @@ const Modulos = ({ onLeccionCreada }) => {
   const [orden, setOrden] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  const handleCrear = async (e) => {
-    e.preventDefault();
-    
-    if (!titulo || !orden) {
-      alert("Por favor llena ambos campos (Orden y Título)");
-      return;
-    }
+  // Dentro de Modulos.jsx
+const handleCrear = async (e) => {
+  e.preventDefault();
+  const { data, error } = await supabase
+    .from('lessons')
+    .insert([{ title: titulo, order_index: orden }])
+    .select();
 
-    setCargando(true);
-
-    try {
-      // Nota: Asegúrate de que 'course_id' sea válido en tu DB. 
-      // Si aún no manejas múltiples cursos, puedes omitirlo o usar un UUID fijo.
-      const { data, error } = await supabase
-        .from('lessons')
-        .insert([
-          { 
-            title: titulo, 
-            order_index: orden,
-            // course_id: 'TU_ID_DE_CURSO_AQUÍ' 
-          }
-        ])
-        .select();
-
-      if (error) throw error;
-
-      if (data && data[0]) {
-        onLeccionCreada(data[0]); // Esto actualiza el Sidebar en tiempo real
-        setTitulo('');
-        setOrden('');
-        alert("Punto agregado al temario con éxito");
-      }
-    } catch (error) {
-      console.error("Error al insertar:", error.message);
-      alert("Error: " + error.message);
-    } finally {
-      setCargando(false);
-    }
-  };
-
+  if (data) {
+    onLeccionCreada(data[0]); // Esto es lo que llena los cuadrantes en el Dashboard
+    setTitulo('');
+    setOrden('');
+  }
+};
   return (
     <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
       <form onSubmit={handleCrear} style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>

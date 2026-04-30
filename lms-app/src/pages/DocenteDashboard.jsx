@@ -1,75 +1,69 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { useProfile } from '../hooks/useProfile';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar'; // 1. Importa el componente
-import EditorContenido from '../components/EditorContenido';
-import Modulos from '../components/Modulos';
-
+// DocenteDashboard.jsx
 const DocenteDashboard = () => {
-  const [lecciones, setLecciones] = useState([]); // Importante: inicializar con []
+  const [lecciones, setLecciones] = useState([]);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [subtemaActivo, setSubtemaActivo] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  // Cargar lecciones al inicio
-  useEffect(() => {
-    fetchLecciones();
-  }, []);
-  
- const fetchLecciones = async () => {
-    const { data } = await supabase
-      .from('lessons')
-      .select('*')
-      .order('order_index', { ascending: true });
-    if (data) setLecciones(data);
-  };
 
-  // Esta función se activará cuando Modulos cree una lección
-  const manejarNuevaLeccion = (nuevaLeccion) => {
-    setLecciones((prev) => [...prev, nuevaLeccion]);
-  };
+  // ... useEffect para fetchLecciones ...
 
- return (
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Navbar />
-      
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* El Sidebar ahora recibe la lista que se actualiza sola */}
-        <Sidebar 
-          isOpen={sidebarOpen} 
-          lecciones={lecciones} 
-          setSubtemaActivo={setSubtemaActivo} 
-        />
+        <Sidebar lecciones={lecciones} setSubtemaActivo={setSubtemaActivo} />
 
-        <main style={{ flex: 1, padding: '40px', overflowY: 'auto', backgroundColor: '#f8fafc' }}>
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <main style={{ flex: 1, padding: '40px', backgroundColor: '#f8fafc', overflowY: 'auto' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
             
-            {/* 1. USAMOS EL COMPONENTE MODULOS AQUÍ ABAJO */}
-            <section style={{ marginBottom: '40px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '20px' }}>
-                Configuración de Estructura
-              </h2>
-              <Modulos onLeccionCreada={manejarNuevaLeccion} />
-            </section>
- 
-            <hr style={{ margin: '40px 0', borderColor: '#e2e8f0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+              <h1 className="text-2xl font-bold">Mis Módulos y Lecciones</h1>
+              <button 
+                onClick={() => setMostrarFormulario(!mostrarFormulario)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                {mostrarFormulario ? 'Ver Mis Módulos' : '+ Crear Nuevo Módulo/Lección'}
+              </button>
+            </div>
 
-            {/* 2. EDITOR DE CONTENIDO (Video/Texto) */}
-            <section>
-              {subtemaActivo ? (
+            {mostrarFormulario ? (
+              <Modulos onLeccionCreada={(nueva) => {
+                setLecciones([...lecciones, nueva]);
+                setMostrarFormulario(false);
+              }} />
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
+                {lecciones.length > 0 ? (
+                  lecciones.map((lec) => (
+                    <div 
+                      key={lec.id} 
+                      onClick={() => setSubtemaActivo(lec)}
+                      className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+                    >
+                      <span className="text-blue-500 font-bold text-sm">{lec.order_index}</span>
+                      <h3 className="text-lg font-semibold text-slate-800 mt-2">{lec.title}</h3>
+                      <p className="text-gray-400 text-xs mt-4">Haz clic para editar contenido multimedia</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                    <p className="text-gray-400">No hay lecciones en la base de datos.</p>
+                    <button onClick={() => setMostrarFormulario(true)} className="text-blue-500 font-medium mt-2">
+                      Crea la primera ahora mismo
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Si hay un subtema seleccionado, mostramos el editor de contenido (videos/texto) abajo */}
+            {subtemaActivo && (
+              <div className="mt-10 pt-10 border-t">
                 <EditorContenido leccion={subtemaActivo} />
-              ) : (
-                <div style={{ textAlign: 'center', padding: '40px', border: '2px dashed #cbd5e1', borderRadius: '12px' }}>
-                  <p style={{ color: '#94a3b8' }}>
-                    Selecciona un tema en el menú izquierdo para cargar su contenido multimedia.
-                  </p>
-                </div>
-              )}
-            </section>
+              </div>
+            )}
           </div>
         </main>
       </div>
     </div>
-  );  
+  );
 };
-export default DocenteDashboard;
