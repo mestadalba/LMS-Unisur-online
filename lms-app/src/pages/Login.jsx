@@ -60,7 +60,7 @@ const dirigirPorRol = (role) => {
 
   return (
     <div style={{ maxWidth: '400px', margin: 'auto', padding: '2rem' }}>
-      <img src='/logotipo.png' alt='TAE' />
+      <img className='logologin' src='/logotipo.png' alt='TAE' />
       <h2>TAE | LMS</h2>
       <h3>Iniciar sesiòn</h3>
       <form onSubmit={handleLogin}>
