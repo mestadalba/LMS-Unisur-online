@@ -10,14 +10,29 @@ export default function Navbar({ profile }) {
   };
 
   return (
-    <div style={{
-      background: '#111',
+    <nav style={{
+      height: '70px',
+      backgroundColor: '#000',
       color: 'white',
-      padding: '15px 30px',
       display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      padding: '0 20px',
+      zIndex: 1000
     }}>
+      {/* EL BOTÓN DE HAMBURGUESA VA AQUÍ */}
+      <button 
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'white',
+          fontSize: '28px',
+          cursor: 'pointer',
+          marginRight: '15px'
+        }}
+      >
+        ☰
+      </button>
       <h3 style={{ margin: 0 }}> TAE | LMS</h3>
 
       <div style={{ display: 'flex', gap: '20px' }}>
@@ -35,6 +50,6 @@ export default function Navbar({ profile }) {
           Cerrar sesión
         </span>
       </div>
-    </div>
+    </nav>
   );
 }
