@@ -96,9 +96,9 @@ function App() {
             !session ? (
               <Navigate to="/login" replace />
             ) : (
-              userRole === 'admin' ? <Navigate to="/dashboard" replace /> :
+              userRole === 'alumno' ? <Navigate to="/alumnosdashboard" replace /> :
               userRole === 'docente' ? <Navigate to="/docentedashboard" replace /> :
-              <Navigate to="/alumnosdashboard" replace />
+              <Navigate to="/dashboard" replace />
             )
           }
         />
