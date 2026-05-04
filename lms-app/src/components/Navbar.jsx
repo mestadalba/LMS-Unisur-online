@@ -17,22 +17,10 @@ export default function Navbar({ profile }) {
       display: 'flex',
       alignItems: 'center',
       padding: '0 20px',
-      zIndex: 1000
+      zIndex: 1000,
+      flexwrap: 'wrap',
+      justifyContent: 'space-between'
     }}>
-      {/* EL BOTÓN DE HAMBURGUESA VA AQUÍ */}
-      <button 
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: 'white',
-          fontSize: '28px',
-          cursor: 'pointer',
-          marginRight: '15px'
-        }}
-      >
-        ☰
-      </button>
       <h3 style={{ margin: 0 }}> TAE | LMS</h3>
 
       <div style={{ display: 'flex', gap: '20px' }}>

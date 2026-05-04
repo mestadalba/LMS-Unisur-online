@@ -2,90 +2,109 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
 
+import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CreateCourse from './pages/CreateCourse';
 import Profile from './pages/Profile';
-import DocenteDashboard from './pages/DocenteDashboard'; // Verifica que el archivo exista en esa ruta
-
-// Componente para proteger rutas
-function PrivateRoute({ session, children }) {
-  return session ? children : <Navigate to="/login" />;
-}
+import DocenteDashboard from './pages/DocenteDashboard';
+import AlumnosDashboard from "./pages/AlumnosDashboard";
 
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    // Obtener sesión actual
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
+    // Definimos la función para buscar el rol real en la tabla de la BD
+    const fetchUserRole = async (userId) => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .single();
+
+        if (data && !error) {
+          console.log("✅ Rol recuperado de la BD:", data.role);
+          setUserRole(data.role);
+        } else {
+          console.error("❌ Error al obtener rol de la tabla profiles:", error);
+          setUserRole('alumno'); // Fallback por seguridad
+        }
+      } catch (err) {
+        setUserRole('alumno');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // 1. Verificación inicial de sesión
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        fetchUserRole(session.user.id); // Llamamos a la BD
+      } else {
+        setLoading(false);
+      }
     });
 
-    // Escuchar cambios de sesión
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
+    // 2. Escucha de cambios (Login / Logout)
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        fetchUserRole(session.user.id); // Llamamos a la BD al cambiar estado
+      } else {
+        setUserRole(null);
+        setLoading(false);
       }
-    );
+    });
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  if (loading) return <p>Cargando app...</p>;
+  // Bloqueo de renderizado mientras cargamos sesión y rol
+  if (loading) return <p className="p-10 text-center">Iniciando sistema...</p>;
 
   return (
     <Router>
       <Routes>
-        {/* Públicas */}
+        {/* RUTAS PÚBLICAS */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Privadas */}
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute session={session}>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/docentedashboard" 
-        element={
-          <PrivateRoute session={session}>
-            <DocenteDashboard />
-          </PrivateRoute>
-          } 
-        />
+        {/* RUTAS PROTEGIDAS */}
+        <Route element={<ProtectedRoute userRole={userRole} allowedRoles={['admin']} />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
 
-        <Route
-          path="/create-course"
-          element={
-            <PrivateRoute session={session}>
-              <CreateCourse />
-            </PrivateRoute>
-          }
-        />
+        <Route element={<ProtectedRoute userRole={userRole} allowedRoles={['alumno', 'docente']} />}>
+          <Route path="/docentedashboard" element={<DocenteDashboard />} />
+          <Route path="/create-course" element={<CreateCourse />} />
+        </Route>
 
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute session={session}>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
+        <Route element={<ProtectedRoute userRole={userRole} allowedRoles={['alumno', 'admin']} />}>
+          <Route path="/alumnosdashboard" element={<AlumnosDashboard />} /> 
+          <Route path="/profile" element={<Profile />} />
+        </Route>
 
-        {/* Default */}
+        {/* REDIRECCIÓN RAÍZ INTELIGENTE */}
         <Route
           path="/"
-          element={<Navigate to={session ? "/dashboard" : "/login"} />}
+          element={
+            !session ? (
+              <Navigate to="/login" replace />
+            ) : (
+              userRole === 'admin' ? <Navigate to="/dashboard" replace /> :
+              userRole === 'docente' ? <Navigate to="/docentedashboard" replace /> :
+              <Navigate to="/alumnosdashboard" replace />
+            )
+          }
         />
+
+        {/* Catch-all de seguridad */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

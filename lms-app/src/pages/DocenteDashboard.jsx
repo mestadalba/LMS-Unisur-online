@@ -37,13 +37,12 @@ const DocenteDashboard = () => {
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         />
 
-        <main style={{ flex: 1, overflowY: 'auto', padding: '40px' }}>
+        <main style={{ flex: 1, overflowY: 'auto', padding: '0px 20px' }}>
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden', width: 'auto' }}>
             
            {/* Contenedor Principal Ajustado */}
 <main style={{ 
   flex: 1, 
-  padding: '40px', 
   backgroundColor: '#f8fafc', 
   overflowY: 'auto',
   transition: 'margin-left 0.3s ease', // Suaviza el movimiento cuando el sidebar abre/cierra
@@ -86,7 +85,7 @@ const DocenteDashboard = () => {
       }} />
     ) : (
       <div style={{ 
-        display: 'grid', 
+        display: 'contents', 
         gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 2fr))', 
         gap: '15px' 
       }}>

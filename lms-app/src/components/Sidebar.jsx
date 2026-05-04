@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Sidebar = ({ isOpen, toggleSidebar, lecciones, setSubtemaActivo }) => {
+const Sidebar = ({ isOpen, toggleSidebar, lecciones = [], setSubtemaActivo, role = 'alumno' }) => {
   const [openModulo, setOpenModulo] = useState(true);
 
   const sidebarContainerStyle = {
@@ -36,6 +36,8 @@ const Sidebar = ({ isOpen, toggleSidebar, lecciones, setSubtemaActivo }) => {
     display: isOpen ? 'none' : 'block', // Solo se ve si está cerrado
   };
 
+  if (!role) return <div className="w-64 bg-slate-900 h-screen" />;
+
   return (
     <div style={sidebarContainerStyle}>
       {/* Botón Hamburguesa cuando está CERRADO */}
@@ -46,7 +48,7 @@ const Sidebar = ({ isOpen, toggleSidebar, lecciones, setSubtemaActivo }) => {
       {/* Contenido del Sidebar cuando está ABIERTO */}
       <div style={menuContentStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>NAVEGACIÓN DOCENTE</span>
+          <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>NAVEGACIÓN {role.toUpperCase()}</span>
           <button 
             onClick={toggleSidebar} 
             style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '20px' }}

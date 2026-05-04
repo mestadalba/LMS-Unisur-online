@@ -44,16 +44,21 @@ const Login = () => {
   }
 };
 
-// Función auxiliar para no repetir código
 const dirigirPorRol = (role) => {
   console.log("Navegando como:", role);
+  
+  // Normalizamos el string para evitar errores por espacios o mayúsculas
   const cleanRole = role?.toLowerCase().trim();
 
   if (cleanRole === 'admin') {
     navigate('/dashboard');
   } else if (cleanRole === 'docente') {
     navigate('/docentedashboard');
+  } else if (cleanRole === 'alumno') {
+    navigate('/alumnosdashboard'); // Coincide con la ruta en App.jsx
   } else {
+    // Si el rol es extraño o nulo, por seguridad mandamos al login o al dashboard básico
+    console.warn("Rol no reconocido, redirigiendo a alumnos por defecto.");
     navigate('/alumnosdashboard');
   }
 };
